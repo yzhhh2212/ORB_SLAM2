@@ -37,6 +37,7 @@
 #include "Initializer.h"
 #include "MapDrawer.h"
 #include "System.h"
+#include "PointCloudMapping.h"
 
 #include <mutex>
 
@@ -64,6 +65,8 @@ public:
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
+    //set点云线程指针方法
+    void SetPointCloudMapping(PointCloudMapping* pPointCloudMapping);
     void SetViewer(Viewer* pViewer);
 
     // Load new settings
@@ -153,6 +156,8 @@ protected:
     //Other Thread Pointers
     LocalMapping* mpLocalMapper;
     LoopClosing* mpLoopClosing;
+    //点云线程指针
+    PointCloudMapping* mpPointCloudMapping;
 
     //ORB
     ORBextractor* mpORBextractorLeft, *mpORBextractorRight;

@@ -28,6 +28,7 @@
 #include "Tracking.h"
 
 #include "KeyFrameDatabase.h"
+#include "PointCloudMapping.h"
 
 #include <thread>
 #include <mutex>
@@ -47,7 +48,7 @@ public:
 
     typedef pair<set<KeyFrame*>,int> ConsistentGroup;    
     typedef map<KeyFrame*,g2o::Sim3,std::less<KeyFrame*>,
-        Eigen::aligned_allocator<std::pair<const KeyFrame*, g2o::Sim3> > > KeyFrameAndPose;
+        Eigen::aligned_allocator<std::pair<KeyFrame* const, g2o::Sim3> > > KeyFrameAndPose;
 
 public:
 
@@ -56,6 +57,9 @@ public:
     void SetTracker(Tracking* pTracker);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
+
+    //点云线程指针set方法
+    void SetPointCloudMapping(PointCloudMapping* pPointCloudMapping);
 
     // Main function
     void Run();
@@ -106,6 +110,8 @@ protected:
 
     Map* mpMap;
     Tracking* mpTracker;
+    //点云的线程指针
+    PointCloudMapping* mpPointCloudMapping;
 
     KeyFrameDatabase* mpKeyFrameDB;
     ORBVocabulary* mpORBVocabulary;

@@ -77,14 +77,14 @@ int main(int argc, char **argv)
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image and depthmap from file
-        imRGB = cv::imread(string(argv[3])+"/"+vstrImageFilenamesRGB[ni],CV_LOAD_IMAGE_UNCHANGED);
-        imD = cv::imread(string(argv[3])+"/"+vstrImageFilenamesD[ni],CV_LOAD_IMAGE_UNCHANGED);
+        imRGB = cv::imread(string(argv[3])+"/"+vstrImageFilenamesRGB[ni],cv::IMREAD_UNCHANGED);
+        imD = cv::imread(string(argv[3])+"/"+vstrImageFilenamesD[ni],cv::IMREAD_UNCHANGED);
         double tframe = vTimestamps[ni];
 
         if(imRGB.empty())
         {
-            cerr << endl << "Failed to load image at: "
-                 << string(argv[3]) << "/" << vstrImageFilenamesRGB[ni] << endl;
+            cerr << endl << "Failed to load image at:  "
+                 << string(argv[3]) << "/" << vstrImageFilenamesRGB[ni] << ni << endl;
             return 1;
         }
 
@@ -93,9 +93,11 @@ int main(int argc, char **argv)
 #else
         std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
 #endif
+    
 
         // Pass the image to the SLAM system
         SLAM.TrackRGBD(imRGB,imD,tframe);
+
 
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -134,8 +136,10 @@ int main(int argc, char **argv)
 
     // Save camera trajectory
     SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
-    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");   
-
+    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt"); 
+    cout << "正在保存点云" << endl << endl;
+    SLAM.SavePointCloud();
+    cout << "保存点云成功" << endl << endl;
     return 0;
 }
 

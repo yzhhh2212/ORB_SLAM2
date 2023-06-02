@@ -158,6 +158,12 @@ void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
     mpLoopClosing=pLoopClosing;
 }
 
+//点云线程set方法
+void Tracking::SetPointCloudMapping(PointCloudMapping *pPointCloudMapping)
+{
+    mpPointCloudMapping=pPointCloudMapping;
+}
+
 void Tracking::SetViewer(Viewer *pViewer)
 {
     mpViewer=pViewer;
@@ -207,6 +213,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
 {
     mImGray = imRGB;
+    
     cv::Mat imDepth = imD;
 
     if(mImGray.channels()==3)
@@ -226,8 +233,11 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
-
+    //获取帧的深度图
+    
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
+    mCurrentFrame.mimRGBForPC = imRGB;
+    //mCurrentFrame.SetDepthForPC(imDepth);
 
     Track();
 
@@ -466,6 +476,8 @@ void Tracking::Track()
                 if(mCurrentFrame.mvpMapPoints[i] && mCurrentFrame.mvbOutlier[i])
                     mCurrentFrame.mvpMapPoints[i]=static_cast<MapPoint*>(NULL);
             }
+
+
         }
 
         // Reset if the camera get lost soon after initialization
@@ -1067,6 +1079,8 @@ void Tracking::CreateNewKeyFrame()
 
     KeyFrame* pKF = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
 
+    //pKF->mimDepthOriginal = mCurrentFrame.mimDepthOriginal;
+    
     mpReferenceKF = pKF;
     mCurrentFrame.mpReferenceKF = pKF;
 
@@ -1136,8 +1150,11 @@ void Tracking::CreateNewKeyFrame()
 
     mpLocalMapper->SetNotStop(false);
 
+    mpPointCloudMapping->InsertKeyFrame(pKF);
+
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;
+    
 }
 
 void Tracking::SearchLocalPoints()

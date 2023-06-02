@@ -28,6 +28,7 @@
 #include "ORBextractor.h"
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
+#include "PointCloudMapping.h"
 
 #include <mutex>
 
@@ -44,6 +45,11 @@ class KeyFrame
 {
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+
+    //点云方法
+    void SetPointCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &Cloud);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr GetPointCloud();
+
 
     // Pose functions
     void SetPose(const cv::Mat &Tcw);
@@ -187,7 +193,10 @@ public:
     const int mnMaxX;
     const int mnMaxY;
     const cv::Mat mK;
-
+    
+    cv::Mat mimDepthOriginal;//原png
+    cv::Mat mimDepthForPC;//为了点云新增加的深度图变量
+    cv::Mat mimRGBForPC;
 
     // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
@@ -228,9 +237,14 @@ protected:
 
     Map* mpMap;
 
+    //每一帧的点云
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr mpCurrentPointCloud;// 帧坐标下的点云
+
     std::mutex mMutexPose;
     std::mutex mMutexConnections;
     std::mutex mMutexFeatures;
+    //点云锁
+    std::mutex mMutexPointCloud;
 };
 
 } //namespace ORB_SLAM

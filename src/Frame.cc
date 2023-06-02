@@ -118,7 +118,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
 
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
-     mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
+     mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth), mimDepthForPC(imDepth)
 {
     // Frame ID
     mnId=nNextId++;
@@ -678,5 +678,15 @@ cv::Mat Frame::UnprojectStereo(const int &i)
     else
         return cv::Mat();
 }
+//set和获取为点云而新加的点云图矩阵
+    void Frame::SetDepthForPC(cv::Mat imD) 
+    {
+        this->mimDepthForPC=imD;
+    }
+
+    cv::Mat Frame::GetDepthForPC()
+    {
+        return this->mimDepthForPC;
+    }
 
 } //namespace ORB_SLAM

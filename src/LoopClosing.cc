@@ -31,7 +31,7 @@
 #include<mutex>
 #include<thread>
 
-
+#include <pcl/io/pcd_io.h>
 namespace ORB_SLAM2
 {
 
@@ -52,6 +52,11 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 {
     mpLocalMapper=pLocalMapper;
 }
+
+void LoopClosing::SetPointCloudMapping(PointCloudMapping* pPointCloudMapping)
+ {
+    mpPointCloudMapping=pPointCloudMapping;
+ }
 
 
 void LoopClosing::Run()
@@ -403,6 +408,8 @@ void LoopClosing::CorrectLoop()
 {
     cout << "Loop detected!" << endl;
 
+    mpPointCloudMapping->mflag = 1;
+
     // Send a stop signal to Local Mapping
     // Avoid new keyframes are inserted while correcting the loop
     mpLocalMapper->RequestStop();
@@ -576,6 +583,7 @@ void LoopClosing::CorrectLoop()
     mbRunningGBA = true;
     mbFinishedGBA = false;
     mbStopGBA = false;
+    cout << "闭环闭环泰裤辣" << endl;
     mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment,this,mpCurrentKF->mnId);
 
     // Loop closed. Release Local Mapping.
@@ -739,12 +747,15 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
             mpMap->InformNewBigChange();
 
             mpLocalMapper->Release();
-
             cout << "Map updated!" << endl;
         }
-
         mbFinishedGBA = true;
         mbRunningGBA = false;
+        //pcl::io::savePCDFileBinary("beforeLC.pcd", *mpPointCloudMapping->mpGlobalCloud);
+        unique_lock<mutex> lock222(mpPointCloudMapping->mMutexPCForLC,defer_lock);
+        lock222.lock();
+        mpPointCloudMapping->mflagLC = 1;
+        lock222.unlock();
     }
 }
 

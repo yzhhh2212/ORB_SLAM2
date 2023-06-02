@@ -35,6 +35,11 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "PointCloudMapping.h"
+
 
 namespace ORB_SLAM2
 {
@@ -112,6 +117,8 @@ public:
     // See format details at: http://www.cvlibs.net/datasets/kitti/eval_odometry.php
     void SaveTrajectoryKITTI(const string &filename);
 
+    void SavePointCloud();
+
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
     // LoadMap(const string &filename);
@@ -121,6 +128,8 @@ public:
     int GetTrackingState();
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+
+    std::thread* GetPointCloudThread();
 
 private:
 
@@ -154,11 +163,14 @@ private:
     FrameDrawer* mpFrameDrawer;
     MapDrawer* mpMapDrawer;
 
+    PointCloudMapping* mpPointCloudMapping;
+
     // System threads: Local Mapping, Loop Closing, Viewer.
     // The Tracking thread "lives" in the main execution thread that creates the System object.
     std::thread* mptLocalMapping;
     std::thread* mptLoopClosing;
     std::thread* mptViewer;
+    std::thread* mptPointCloudMapping;
 
     // Reset flag
     std::mutex mMutexReset;

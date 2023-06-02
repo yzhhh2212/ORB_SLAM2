@@ -24,6 +24,7 @@
 #include "Converter.h"
 #include <thread>
 #include <pangolin/pangolin.h>
+#include "PointCloudMapping.h"
 #include <iomanip>
 
 namespace ORB_SLAM2
@@ -94,6 +95,12 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
+    //新建点云线程
+    mpPointCloudMapping = new PointCloudMapping(); 
+    mptPointCloudMapping = new thread(&ORB_SLAM2::PointCloudMapping::DisplayPointCloud,mpPointCloudMapping);
+
+
+
     //Initialize the Viewer thread and launch
     if(bUseViewer)
     {
@@ -105,12 +112,21 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
     mpTracker->SetLoopClosing(mpLoopCloser);
+    //设置点云线程
+    mpTracker->SetPointCloudMapping(mpPointCloudMapping);
+
 
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(mpLoopCloser);
+    //todo：为localmapper设置点云线程
+
+
 
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+    //设置点云线程
+    mpLoopCloser->SetPointCloudMapping(mpPointCloudMapping);
+
 }
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
@@ -300,8 +316,10 @@ void System::Reset()
 
 void System::Shutdown()
 {
+    cout << "System Shutdown" << endl;
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
+    mpPointCloudMapping->RequestFinish();
     if(mpViewer)
     {
         mpViewer->RequestFinish();
@@ -310,8 +328,9 @@ void System::Shutdown()
     }
 
     // Wait until all thread have effectively stopped
-    while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
+    while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || !mpPointCloudMapping->isFinished() || mpLoopCloser->isRunningGBA())
     {
+        //cout << "有的线程害没结束呢,先不shutdown" << endl;
         usleep(5000);
     }
 
@@ -470,6 +489,10 @@ void System::SaveTrajectoryKITTI(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
+void System::SavePointCloud()
+{
+    mpPointCloudMapping->SavePointCloud();    
+}
 
 int System::GetTrackingState()
 {
@@ -489,4 +512,12 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     return mTrackedKeyPointsUn;
 }
 
+std::thread* System::GetPointCloudThread()
+{
+    return mptPointCloudMapping;
+}
+
 } //namespace ORB_SLAM
+
+
+

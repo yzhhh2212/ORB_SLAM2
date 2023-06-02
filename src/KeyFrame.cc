@@ -41,7 +41,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     mvInvLevelSigma2(F.mvInvLevelSigma2), mnMinX(F.mnMinX), mnMinY(F.mnMinY), mnMaxX(F.mnMaxX),
     mnMaxY(F.mnMaxY), mK(F.mK), mvpMapPoints(F.mvpMapPoints), mpKeyFrameDB(pKFDB),
     mpORBvocabulary(F.mpORBvocabulary), mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
-    mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap)
+    mbToBeErased(false), mbBad(false), mHalfBaseline(F.mb/2), mpMap(pMap) ,mimDepthForPC(F.mimDepthForPC), mimRGBForPC(F.mimRGBForPC)
 {
     mnId=nNextId++;
 
@@ -52,8 +52,23 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
         for(int j=0; j<mnGridRows; j++)
             mGrid[i][j] = F.mGrid[i][j];
     }
-
+    F.mimDepthForPC.release();
+    F.mimDepthOriginal.release();
+    F.mimRGBForPC.release();
     SetPose(F.mTcw);    
+}
+
+//点云方法
+void KeyFrame::SetPointCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &Cloud)
+{
+    unique_lock<mutex> lock(mMutexPointCloud);
+    mpCurrentPointCloud = Cloud;
+
+}
+pcl::PointCloud<pcl::PointXYZRGBA>::Ptr KeyFrame::GetPointCloud()
+{
+    unique_lock<mutex> lock(mMutexPointCloud);
+    return mpCurrentPointCloud;
 }
 
 void KeyFrame::ComputeBoW()

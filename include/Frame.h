@@ -69,6 +69,10 @@ public:
     // Computes rotation, translation and camera center matrices from the camera pose.
     void UpdatePoseMatrices();
 
+    void SetDepthForPC(cv::Mat imD);
+
+    cv::Mat GetDepthForPC();
+
     // Returns the camera center.
     inline cv::Mat GetCameraCenter(){
         return mOw.clone();
@@ -186,7 +190,9 @@ public:
     static float mnMaxY;
 
     static bool mbInitialComputations;
-
+    cv::Mat mimDepthOriginal;//原png
+    cv::Mat mimDepthForPC;//为了点云新增加的深度图变量
+    cv::Mat mimRGBForPC;//点云的RGB图
 
 private:
 
@@ -205,7 +211,7 @@ private:
     cv::Mat mRcw;
     cv::Mat mtcw;
     cv::Mat mRwc;
-    cv::Mat mOw; //==mtwc
+    cv::Mat mOw;//==mtwc 
 };
 
 }// namespace ORB_SLAM
