@@ -330,7 +330,7 @@ void System::Shutdown()
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || !mpPointCloudMapping->isFinished() || mpLoopCloser->isRunningGBA())
     {
-        //cout << "有的线程害没结束呢,先不shutdown" << endl;
+        cout << "有的线程害没结束呢,先不shutdown" << endl;
         usleep(5000);
     }
 

@@ -45,7 +45,7 @@ public:
     void InsertKeyFrame(KeyFrame *pKF);
 
     //更新点云
-    void UpdatePointCloud(const pcl::visualization::PCLVisualizer::Ptr& viewer);
+    void UpdatePointCloud();
 
     //保存点云
     void SavePointCloud();
@@ -59,7 +59,7 @@ public:
     std::vector<KeyFrame*> mvpKF;
     // pcl::PointCloud<pcl::PointXYZRGBA>::Ptr mpGlobalCloud;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr mpGlobalCloud;
-
+    void VisualizationCallback(pcl::visualization::PCLVisualizer& viz);
     bool mflag ;
 
     std::mutex mMutexPC;
@@ -85,7 +85,7 @@ protected:
     std::mutex mMutexPCFinish;
     std::mutex mMutexPCStop;
     std::mutex mMutexPCInsertStop;
-
+    std::mutex mMutexGlobalPC;
 
 
 };
