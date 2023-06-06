@@ -34,6 +34,7 @@ namespace ORB_SLAM2
         mflagThread = 0;
         mbUpdateCloudFinished = false;
 
+        XInitThreads();
         UnsetInsertStop();
     }
 
