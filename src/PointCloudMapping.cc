@@ -40,26 +40,26 @@ namespace ORB_SLAM2
     {
         mbFinished = false;
         // pangolin初始化相关
-        pangolin::CreateWindowAndBind("Map Viewer", 1024, 768);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        pangolin::OpenGlRenderState vis_camera(
-            pangolin::ProjectionMatrix(1024, 768, 535.4, 539.2, 512, 384, 0.1, 1000),
-            pangolin::ModelViewLookAt(0, 0, -1.5, 0, 0, 0, 0.0, -1.0, 0.0));
+        // pangolin::CreateWindowAndBind("Map Viewer", 1024, 768);
+        // glEnable(GL_DEPTH_TEST);
+        // glEnable(GL_BLEND);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // pangolin::OpenGlRenderState vis_camera(
+        //     pangolin::ProjectionMatrix(1024, 768, 535.4, 539.2, 512, 384, 0.1, 1000),
+        //     pangolin::ModelViewLookAt(0, 0, -1.5, 0, 0, 0, 0.0, -1.0, 0.0));
 
-        // Add named OpenGL viewport to window and provide 3D Handler
-        pangolin::View &vis_display = pangolin::CreateDisplay()
-                                          .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f / 768.0f)
-                                          .SetHandler(new pangolin::Handler3D(vis_camera));
+        // // Add named OpenGL viewport to window and provide 3D Handler
+        // pangolin::View &vis_display = pangolin::CreateDisplay()
+        //                                   .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f / 768.0f)
+        //                                   .SetHandler(new pangolin::Handler3D(vis_camera));
 
-        // pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("PCViewer"));
-        //  pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr tmp(new pcl::PointCloud<pcl::PointXYZRGBA>);
-        //  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> rgb(mpGlobalCloud);
-        //  viewer->addPointCloud<pcl::PointXYZRGBA>(mpGlobalCloud, rgb, "cloud");
-        //  viewer->setBackgroundColor(0, 0, 0);
-        //  viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
-        //  viewer->initCameraParameters();
+        pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("PCViewer"));
+         pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr tmp(new pcl::PointCloud<pcl::PointXYZRGBA>);
+         pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> rgb(mpGlobalCloud);
+         viewer->addPointCloud<pcl::PointXYZRGBA>(mpGlobalCloud, rgb, "cloud");
+         viewer->setBackgroundColor(0, 0, 0);
+         viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
+         viewer->initCameraParameters();
 
         KeyFrame *pKF;
 
@@ -69,13 +69,13 @@ namespace ORB_SLAM2
         int updateN = 0;
         bool flag3 = 0;
         int N = 0;
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         int iii = 0;
         while (1)
         {
 
-            // viewer->spinOnce(500);
+            viewer->spinOnce(500);
             // pangolin清除上一帧信息
 
             unique_lock<std::mutex> lock(mMutexPCKF, defer_lock);
@@ -93,7 +93,7 @@ namespace ORB_SLAM2
                 // 停止插入关键帧(仅停止插入到点云类，tracking仍然进行)
                 SetInsertStop();
                 mbUpdateCloudFinished = false;
-                UpdatePointCloud();
+                UpdatePointCloud(viewer);
                 flaglc = 0;
                 lock222.lock();
                 mflagLC = 0;
@@ -114,12 +114,12 @@ namespace ORB_SLAM2
                     pKF = mvpKF[lastN];
                     lock.unlock();
                     cv::Mat Twc = pKF->GetPoseInverse();
-                    Eigen::Isometry3d T1 = ORB_SLAM2::Converter::toSE3Quat(Twc);
-                    pangolin::OpenGlMatrix m(T1.matrix());
+                    // Eigen::Isometry3d T1 = ORB_SLAM2::Converter::toSE3Quat(Twc);
+                    // pangolin::OpenGlMatrix m(T1.matrix());
                     //vis_camera.Follow(m);
-                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-                    vis_display.Activate(vis_camera);
+                    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                    // vis_display.Activate(vis_camera);
                     cloud = GenerateCloud(pKF);
 
                     *mpGlobalCloud += *cloud;
@@ -135,22 +135,24 @@ namespace ORB_SLAM2
                     //     glVertex3d(p.x, p.y, p.z);
                     // }
                     //glBegin(GL_POINTS);
-                    for (iii=0; iii < cloud->points.size(); iii++)
-                    {
-                        pcl::PointXYZRGBA &p = mpGlobalCloud->points[iii];
-                        uint8_t r = (p.rgba >> 16) & 0x0000ff;
-                        uint8_t g = (p.rgba >> 8) & 0x0000ff;
-                        uint8_t b = (p.rgba) & 0x0000ff;
+                    // for (iii=0; iii < cloud->points.size(); iii++)
+                    // {
+                    //     pcl::PointXYZRGBA &p = mpGlobalCloud->points[iii];
+                    //     uint8_t r = (p.rgba >> 16) & 0x0000ff;
+                    //     uint8_t g = (p.rgba >> 8) & 0x0000ff;
+                    //     uint8_t b = (p.rgba) & 0x0000ff;
 
-                        glColor3f(r / 255.0f, g / 255.0f, b / 255.0f);
-                        glVertex3d(p.x, p.y, p.z);
-                    }
-                    //glEnd();
+                    //     glColor3f(r / 255.0f, g / 255.0f, b / 255.0f);
+                    //     glVertex3d(p.x, p.y, p.z);
+                    // }
+                    // //glEnd();
 
-                    pangolin::FinishFrame();
+                    // pangolin::FinishFrame();
                     // cloud = nullptr;
-                    // viewer->updatePointCloud(mpGlobalCloud, "cloud");
+                    viewer->updatePointCloud(mpGlobalCloud);
                     // cloud = nullptr;
+                    
+                    // viewer.showCloud(mpGlobalCloud);
                 }
                 // lastN = N ;
             }
@@ -166,9 +168,9 @@ namespace ORB_SLAM2
         SetFinish(); // 标志线程已经finished
     }
 
-    void PointCloudMapping::UpdatePointCloud()
+    void PointCloudMapping::UpdatePointCloud(const pcl::visualization::PCLVisualizer::Ptr& viewer)
     {
-
+        viewer->close();
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr tmp1(new pcl::PointCloud<pcl::PointXYZRGBA>);
         cout << "检测到闭环，正在更新点云" << endl;
         cout << "一共有 ： " << mvpKF.size() << endl;
@@ -199,6 +201,8 @@ namespace ORB_SLAM2
         }
         mpGlobalCloud = tmp1;
         mflag = 0;
+        // viewer->updatePointCloud(mpGlobalCloud); 
+        viewer->spinOnce(500);
     }
 
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr PointCloudMapping::GenerateCloud(KeyFrame *pKF)

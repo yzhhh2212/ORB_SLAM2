@@ -1,7 +1,7 @@
 #ifndef POINTCLOUDMAPPING_H
 #define POINTCLOUDMAPPING_H
 
-
+#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/point_types.h>
 #include <iostream>
 #include<vector>
@@ -45,11 +45,11 @@ public:
     void InsertKeyFrame(KeyFrame *pKF);
 
     //更新点云
-    void UpdatePointCloud();
+    void UpdatePointCloud(const pcl::visualization::PCLVisualizer::Ptr& viewer);
 
     //保存点云
     void SavePointCloud();
-
+    
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr GenerateCloud(KeyFrame *pKF);
 
 public:
