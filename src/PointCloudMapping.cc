@@ -109,7 +109,7 @@ namespace ORB_SLAM2
             }
         }
         SetFinish(); // 标志线程已经finished
-        RosThread.join();
+        // RosThread.join();
     }
 
     void PointCloudMapping::UpdatePointCloud()
@@ -202,7 +202,7 @@ namespace ORB_SLAM2
         // cout << "滤波中" << endl;
         pcl::VoxelGrid<pcl::PointXYZRGBA> vg;
         vg.setInputCloud(cloud);
-        vg.setLeafSize(0.012f, 0.012f, 0.012f);
+        vg.setLeafSize(0.02f, 0.02f, 0.02f);
         // vg.filter(*tmp);
         // cout << "滤波ed" << endl;
         vg.filter(*cloud);
@@ -353,7 +353,7 @@ namespace ORB_SLAM2
     {
         std::unique_lock<mutex> lockGlobalPCinAdd(mMutexGlobalPC);
         {
-            mpGlobalCloud += PC;
+            *mpGlobalCloud += *PC;
         }
     }
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr PointCloudMapping::CloneGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC)

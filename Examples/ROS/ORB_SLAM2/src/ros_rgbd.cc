@@ -36,7 +36,7 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud1.h>
+#include <sensor_msgs/PointCloud2.h>
 using namespace std;
 
 class ImageGrabber
@@ -49,7 +49,7 @@ public:
     ORB_SLAM2::System* mpSLAM;
 };
 
-void PointCloudPublishThread(ORB_SLAM2::System SLAM)
+void PointCloudPublishThread(ORB_SLAM2::System &SLAM)
 {
 
         ros::NodeHandle nh;
@@ -60,10 +60,11 @@ void PointCloudPublishThread(ORB_SLAM2::System SLAM)
         ros::Rate rate(10);
         while (ros::ok() && !SLAM.GetPointCloud()->isFinished())
         {
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGB>);
+            pcl::PointCloud<pcl::PointXYZRGBA>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGBA>);
             SLAM.GetPointCloud()->CloneGlobalPC(tmp);
             
             pcl::toROSMsg(*tmp,output);
+            output.header.frame_id = "map";
             PointCloudPublisher.publish(output);
             ros::spinOnce();
             rate.sleep();
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
-    std::thread PointCloudPublishing(PointCloudPublishThread,SLAM);
+    std::thread PointCloudPublishing(PointCloudPublishThread,std::ref(SLAM));
     ros::spin();
 
     // Stop all threads
