@@ -33,7 +33,7 @@ namespace ORB_SLAM2
         mflagLC = 0;
         mflagThread = 0;
         mbUpdateCloudFinished = false;
-
+        USEPCLVIEWER = false;
         XInitThreads();
         UnsetInsertStop();
     }
@@ -41,7 +41,6 @@ namespace ORB_SLAM2
     void PointCloudMapping::DisplayPointCloud()
     {
         mbFinished = false;
-        pcl::visualization::CloudViewer *viewer = new pcl::visualization::CloudViewer("PCviewer");
         KeyFrame *pKF;
 
         int lastN = 0;
@@ -50,7 +49,12 @@ namespace ORB_SLAM2
         bool flag3 = 0;
         int N = 0;
         int iii = 0;
-        viewer->runOnVisualizationThread(std::bind(&PointCloudMapping::VisualizationCallback, this, std::placeholders::_1), "VisualizationCallback");
+        if (USEPCLVIEWER)
+        {
+            pcl::visualization::CloudViewer *viewer = new pcl::visualization::CloudViewer("PCviewer");
+            viewer->runOnVisualizationThread(std::bind(&PointCloudMapping::VisualizationCallback, this, std::placeholders::_1), "VisualizationCallback");
+        }
+        // std::thread RosThread = new thread(&PointCloudMapping::PointCloudPublish, this);
         while (1)
         {
 
@@ -105,6 +109,7 @@ namespace ORB_SLAM2
             }
         }
         SetFinish(); // 标志线程已经finished
+        RosThread.join();
     }
 
     void PointCloudMapping::UpdatePointCloud()
@@ -168,6 +173,8 @@ namespace ORB_SLAM2
                 z = Depth.at<float>(v, u);
                 if (z < 0.01 || z > 5)
                     continue;
+                else if (std::isnan(z))
+                    z = 0;
                 x = (u - pKF->cx) * z * pKF->invfx;
                 y = (v - pKF->cy) * z * pKF->invfy;
 
@@ -196,11 +203,11 @@ namespace ORB_SLAM2
         pcl::VoxelGrid<pcl::PointXYZRGBA> vg;
         vg.setInputCloud(cloud);
         vg.setLeafSize(0.012f, 0.012f, 0.012f);
-        vg.filter(*tmp);
+        // vg.filter(*tmp);
         // cout << "滤波ed" << endl;
-
-        pKF->SetPointCloud(tmp); // 帧坐标下的点云
-        pcl::transformPointCloud(*tmp, *cloud2, T1.matrix());
+        vg.filter(*cloud);
+        pKF->SetPointCloud(cloud); // 帧坐标下的点云
+        pcl::transformPointCloud(*cloud, *cloud2, T1.matrix());
         pKF->mimDepthForPC.release();
         pKF->mimRGBForPC.release();
         pKF->mimDepthOriginal.release();
@@ -295,7 +302,7 @@ namespace ORB_SLAM2
         //}
         // else
         {
-            cout << "更新viewer" << std::endl;
+            // cout << "更新viewer" << std::endl;
             std::unique_lock<mutex> lockGlobal1(mMutexGlobalPC);
             {
                 pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> rgb(mpGlobalCloud);
@@ -306,4 +313,56 @@ namespace ORB_SLAM2
             }
         }
     }
+    // void PointCloudMapping::PointCloudPublish()
+    // {
+    //     int zero = 0;
+    //     char **nullpointer = nullptr;
+    //     ros::init(zero, nullpointer, "PointCloudPublishing");
+    //     ros::NodeHandle nh;
+
+    //     ros::Publisher PointCloudPublisher = nh.advertise<sensor_msgs::PointCloud2>("PointCloud", 1);
+    //     sensor_msgs::PointCloud2 output;
+
+    //     ros::Rate rate(10);
+    //     while (ros::ok() && !isFinished())
+    //     {
+    //         std::unique_lock<mutex> lockRosGlobalPC(mMutexGlobalPC);
+    //         {
+    //             pcl::toROSMsg(*mpGlobalCloud, output);
+    //         }
+    //         PointCloudPublisher.publish(output);
+    //         ros::spinOnce();
+    //         rate.sleep();
+    //     }
+    // }
+    void PointCloudMapping::SetGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC)
+    {
+        std::unique_lock<std::mutex> lockGlobalPCinSet(mMutexGlobalPC);
+        {
+            mpGlobalCloud = PC;
+        }
+    }
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr PointCloudMapping::GetGlobalPC()
+    {
+        std::unique_lock<mutex> lockGlobalPCinGet(mMutexGlobalPC);
+        {
+            return mpGlobalCloud;
+        }
+    }
+    void PointCloudMapping::AddGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC)
+    {
+        std::unique_lock<mutex> lockGlobalPCinAdd(mMutexGlobalPC);
+        {
+            mpGlobalCloud += PC;
+        }
+    }
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr PointCloudMapping::CloneGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC)
+    {
+        std::unique_lock<mutex> lockGlobalPCinClone(mMutexGlobalPC);
+        {
+            *PC = *mpGlobalCloud;
+        }
+        return PC;
+    }
+
 }

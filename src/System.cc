@@ -100,6 +100,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mptPointCloudMapping = new thread(&ORB_SLAM2::PointCloudMapping::DisplayPointCloud,mpPointCloudMapping);
 
 
+    mpPointCloudMapping->USEPCLVIEWER = false;
 
     //Initialize the Viewer thread and launch
     if(bUseViewer)
@@ -314,6 +315,7 @@ void System::Reset()
     mbReset = true;
 }
 
+
 void System::Shutdown()
 {
     cout << "System Shutdown" << endl;
@@ -517,7 +519,14 @@ std::thread* System::GetPointCloudThread()
     return mptPointCloudMapping;
 }
 
+PointCloudMapping* System::GetPointCloud()
+{
+    return mpPointCloudMapping;
+}
+
 } //namespace ORB_SLAM
+
+
 
 
 

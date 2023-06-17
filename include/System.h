@@ -130,6 +130,7 @@ public:
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
     std::thread* GetPointCloudThread();
+    PointCloudMapping* GetPointCloud();
 
 private:
 

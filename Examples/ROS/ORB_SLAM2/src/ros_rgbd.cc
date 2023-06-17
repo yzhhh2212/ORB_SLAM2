@@ -34,6 +34,9 @@
 #include "opencv2/imgcodecs/legacy/constants_c.h"
 #include"../../../include/System.h"
 
+#include <pcl_conversions/pcl_conversions.h>
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud1.h>
 using namespace std;
 
 class ImageGrabber
@@ -46,6 +49,26 @@ public:
     ORB_SLAM2::System* mpSLAM;
 };
 
+void PointCloudPublishThread(ORB_SLAM2::System SLAM)
+{
+
+        ros::NodeHandle nh;
+
+        ros::Publisher PointCloudPublisher = nh.advertise<sensor_msgs::PointCloud2>("PointCloud", 1);
+        sensor_msgs::PointCloud2 output;
+
+        ros::Rate rate(10);
+        while (ros::ok() && !SLAM.GetPointCloud()->isFinished())
+        {
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGB>);
+            SLAM.GetPointCloud()->CloneGlobalPC(tmp);
+            
+            pcl::toROSMsg(*tmp,output);
+            PointCloudPublisher.publish(output);
+            ros::spinOnce();
+            rate.sleep();
+        }
+}
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "RGBD");
@@ -60,22 +83,20 @@ int main(int argc, char **argv)
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::RGBD,true);
-
     ImageGrabber igb(&SLAM);
-
     ros::NodeHandle nh;
 
-    message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/camera/rgb/image_raw", 1);
-    message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "camera/depth_registered/image_raw", 1);
+    message_filters::Subscriber<sensor_msgs::Image> rgb_sub(nh, "/camera/rgb/image_color", 1);
+    message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh, "/camera/depth/image", 1);
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
-
+    std::thread PointCloudPublishing(PointCloudPublishThread,SLAM);
     ros::spin();
 
     // Stop all threads
     SLAM.Shutdown();
-
+    PointCloudPublishing.join();
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
