@@ -22,6 +22,7 @@
 #include "LoopClosing.h"
 #include "ORBmatcher.h"
 #include "Optimizer.h"
+#include "PointCloudMapping.h"
 
 #include<mutex>
 
@@ -42,6 +43,11 @@ void LocalMapping::SetLoopCloser(LoopClosing* pLoopCloser)
 void LocalMapping::SetTracker(Tracking *pTracker)
 {
     mpTracker=pTracker;
+}
+
+void LocalMapping::SetPointCloudMapper(PointCloudMapping *pPointCloudMapper)
+{
+    mpPointCloudMapper=pPointCloudMapper;
 }
 
 void LocalMapping::Run()
@@ -84,6 +90,7 @@ void LocalMapping::Run()
                 KeyFrameCulling();
             }
 
+            mpPointCloudMapper->InsertKeyFrame(mpCurrentKeyFrame);
             mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
         }
         else if(Stop())

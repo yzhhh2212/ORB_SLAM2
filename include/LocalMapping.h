@@ -26,6 +26,7 @@
 #include "LoopClosing.h"
 #include "Tracking.h"
 #include "KeyFrameDatabase.h"
+#include "PointCloudMapping.h"
 
 #include <mutex>
 
@@ -45,6 +46,8 @@ public:
     void SetLoopCloser(LoopClosing* pLoopCloser);
 
     void SetTracker(Tracking* pTracker);
+
+    void SetPointCloudMapper(PointCloudMapping* pPointCloudMapper);
 
     // Main function
     void Run();
@@ -103,6 +106,7 @@ protected:
 
     LoopClosing* mpLoopCloser;
     Tracking* mpTracker;
+    PointCloudMapping* mpPointCloudMapper;
 
     std::list<KeyFrame*> mlNewKeyFrames;
 

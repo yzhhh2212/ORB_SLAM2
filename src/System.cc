@@ -119,6 +119,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     mpLocalMapper->SetTracker(mpTracker);
     mpLocalMapper->SetLoopCloser(mpLoopCloser);
+    mpLocalMapper->SetPointCloudMapper(mpPointCloudMapping);
     //todo：为localmapper设置点云线程
 
 

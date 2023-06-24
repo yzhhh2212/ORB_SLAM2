@@ -467,6 +467,10 @@ void Tracking::Track()
             if(NeedNewKeyFrame())
                 CreateNewKeyFrame();
 
+            mCurrentFrame.mimDepthForPC.release();
+            // mCurrentFrame.mimDepthOriginal.release();
+            mCurrentFrame.mimRGBForPC.release();
+
             // We allow points with high innovation (considererd outliers by the Huber Function)
             // pass to the new keyframe, so that bundle adjustment will finally decide
             // if they are outliers or not. We don't want next frame to estimate its position
@@ -1150,7 +1154,7 @@ void Tracking::CreateNewKeyFrame()
 
     mpLocalMapper->SetNotStop(false);
 
-    mpPointCloudMapping->InsertKeyFrame(pKF);
+    // mpPointCloudMapping->InsertKeyFrame(pKF);
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;

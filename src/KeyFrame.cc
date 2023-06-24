@@ -52,9 +52,9 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
         for(int j=0; j<mnGridRows; j++)
             mGrid[i][j] = F.mGrid[i][j];
     }
-    F.mimDepthForPC.release();
-    F.mimDepthOriginal.release();
-    F.mimRGBForPC.release();
+    // F.mimDepthForPC.release();
+    // F.mimDepthOriginal.release();
+    // F.mimRGBForPC.release();
     SetPose(F.mTcw);    
 }
 
@@ -555,6 +555,9 @@ void KeyFrame::SetBadFlag()
     }
 
 
+    // mimDepthForPC.release();
+    // // mimDepthOriginal.release();
+    // mimRGBForPC.release();
     mpMap->EraseKeyFrame(this);
     mpKeyFrameDB->erase(this);
 }

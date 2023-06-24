@@ -66,7 +66,7 @@ public:
     void SetGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC);
     void AddGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &pc);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr CloneGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC);
-
+    std::mutex& GetGlobalPCMutex();
     bool mflag ;
 
     std::mutex mMutexPC;

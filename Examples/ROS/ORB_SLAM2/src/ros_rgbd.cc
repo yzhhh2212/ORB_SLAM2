@@ -32,7 +32,8 @@
 
 #include<opencv2/core/core.hpp>
 #include "opencv2/imgcodecs/legacy/constants_c.h"
-#include"../../../include/System.h"
+// #include"../../../include/System.h"
+#include"System.h"
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <ros/ros.h>
@@ -57,17 +58,25 @@ void PointCloudPublishThread(ORB_SLAM2::System &SLAM)
         ros::Publisher PointCloudPublisher = nh.advertise<sensor_msgs::PointCloud2>("PointCloud", 1);
         sensor_msgs::PointCloud2 output;
 
-        ros::Rate rate(10);
+        // ros::Rate rate(10);
         while (ros::ok() && !SLAM.GetPointCloud()->isFinished())
         {
             pcl::PointCloud<pcl::PointXYZRGBA>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGBA>);
             SLAM.GetPointCloud()->CloneGlobalPC(tmp);
+            // std::unique_lock<mutex> lockGlobalPC(std::ref(SLAM.GetPointCloud()->GetGlobalPCMutex()));
+            // {
+            //     pcl::toROSMsg(*SLAM.GetPointCloud()->GetGlobalPC(),output);
+                
+            // }
             
             pcl::toROSMsg(*tmp,output);
             output.header.frame_id = "map";
             PointCloudPublisher.publish(output);
             ros::spinOnce();
-            rate.sleep();
+            // rate.sleep();
+            std::chrono::milliseconds duration(2000);  // 0.1秒
+            std::this_thread::sleep_for(duration);
+
         }
 }
 int main(int argc, char **argv)
@@ -92,14 +101,17 @@ int main(int argc, char **argv)
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
-    std::thread PointCloudPublishing(PointCloudPublishThread,std::ref(SLAM));
+    // std::thread PointCloudPublishing(PointCloudPublishThread,std::ref(SLAM));
     ros::spin();
 
     // Stop all threads
     SLAM.Shutdown();
-    PointCloudPublishing.join();
+    // PointCloudPublishing.join();
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+    cout<<"正在保存点云"<<endl;
+    SLAM.SavePointCloud();
+    cout<<"保存成功"<<endl;
 
     ros::shutdown();
 
