@@ -38,17 +38,80 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_datatypes.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <nav_msgs/Path.h> 
 using namespace std;
 
 class ImageGrabber
 {
 public:
-    ImageGrabber(ORB_SLAM2::System* pSLAM):mpSLAM(pSLAM){}
+    ImageGrabber(ORB_SLAM2::System* pSLAM):mpSLAM(pSLAM){amount = 0;}
+
+    int amount;
 
     void GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const sensor_msgs::ImageConstPtr& msgD);
 
     ORB_SLAM2::System* mpSLAM;
 };
+
+void PosePublishThread(ORB_SLAM2::System &SLAM)
+{
+        ros::NodeHandle nh;
+        cv::Mat Tcw ;
+        cv::Mat R ;
+        cv::Mat t ;
+        cv::Mat rvec ;
+        tf2::Quaternion q;
+        int amount = 0;
+        
+
+        ros::Publisher PosePublisher = nh.advertise<geometry_msgs::PoseStamped>("Pose", 1);
+        ros::Publisher PathPublisher = nh.advertise<nav_msgs::Path>("Path", 1);
+        geometry_msgs::PoseStamped pose_stamped;
+        nav_msgs::Path path_msg; 
+        path_msg.header.frame_id = "map"; 
+        while (ros::ok() && !SLAM.GetPointCloud()->isFinished())
+        {
+            Tcw = SLAM.GetPointCloud()->WaitAndReturnT();
+            if (Tcw.empty()) 
+            {
+                continue; // or break, return, etc.
+            }
+            R = Tcw(cv::Rect(0, 0, 3, 3));
+            t = Tcw(cv::Rect(3, 0, 1, 3));
+            // Convert rotation matrix to quaternion
+            tf2::Matrix3x3 m(R.at<float>(0, 0), R.at<float>(0, 1), R.at<float>(0, 2),
+            R.at<float>(1, 0), R.at<float>(1, 1), R.at<float>(1, 2),
+            R.at<float>(2, 0), R.at<float>(2, 1), R.at<float>(2, 2));
+
+            m.getRotation(q);
+            pose_stamped.header.stamp = ros::Time::now();
+            pose_stamped.header.frame_id = "map";
+
+            pose_stamped.pose.position.x = t.at<float>(0);
+            pose_stamped.pose.position.y = t.at<float>(1);
+            pose_stamped.pose.position.z = t.at<float>(2);
+
+            pose_stamped.pose.orientation.x = q.x();
+            pose_stamped.pose.orientation.y = q.y();
+            pose_stamped.pose.orientation.z = q.z();
+            pose_stamped.pose.orientation.w = q.w();
+
+            path_msg.poses.push_back(pose_stamped);
+            PosePublisher.publish(pose_stamped);
+            PathPublisher.publish(path_msg);
+
+            cout << "正在发送关键帧POSE： " << amount++ << endl;
+            SLAM.GetPointCloud()->ResetInterrupt();
+
+            ros::spinOnce();
+
+        }
+    
+}
 
 void PointCloudPublishThread(ORB_SLAM2::System &SLAM)
 {
@@ -70,6 +133,7 @@ void PointCloudPublishThread(ORB_SLAM2::System &SLAM)
             // }
             
             pcl::toROSMsg(*tmp,output);
+            output.header.stamp = ros::Time::now();
             output.header.frame_id = "map";
             PointCloudPublisher.publish(output);
             ros::spinOnce();
@@ -101,12 +165,14 @@ int main(int argc, char **argv)
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
     message_filters::Synchronizer<sync_pol> sync(sync_pol(10), rgb_sub,depth_sub);
     sync.registerCallback(boost::bind(&ImageGrabber::GrabRGBD,&igb,_1,_2));
-    // std::thread PointCloudPublishing(PointCloudPublishThread,std::ref(SLAM));
+    std::thread PointCloudPublishing(PointCloudPublishThread,std::ref(SLAM));
+    std::thread PosePublishing(PosePublishThread,std::ref(SLAM));
     ros::spin();
 
     // Stop all threads
     SLAM.Shutdown();
-    // PointCloudPublishing.join();
+    PointCloudPublishing.join();
+    PosePublishing.join();
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
     cout<<"正在保存点云"<<endl;

@@ -90,7 +90,7 @@ void LocalMapping::Run()
                 KeyFrameCulling();
             }
 
-            mpPointCloudMapper->InsertKeyFrame(mpCurrentKeyFrame);
+            // mpPointCloudMapper->InsertKeyFrame(mpCurrentKeyFrame);
             mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
         }
         else if(Stop())

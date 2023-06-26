@@ -17,6 +17,7 @@
 #include <pcl/console/parse.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pangolin/pangolin.h>
+#include <condition_variable> 
 
 namespace ORB_SLAM2
 {
@@ -98,13 +99,18 @@ namespace ORB_SLAM2
                     pKF = mvpKF[lastN];
                     lock.unlock();
                     cv::Mat Twc = pKF->GetPoseInverse();
-                    cout << "beforeGenerate" << endl;
                     cloud = GenerateCloud(pKF);
                     if(cloud == nullptr)
                         continue;
                     std::unique_lock<std::mutex> lockGlobal(mMutexGlobalPC);
                     {
                         *mpGlobalCloud += *cloud;
+                    }
+                    std::unique_lock<std::mutex> lockT(mMutexRosT);
+                    {
+                        mRosTwc = Twc;
+                        mInterrupt = true;
+                        mCV.notify_one();
                     }
                 }
             }
@@ -392,6 +398,21 @@ namespace ORB_SLAM2
     std::mutex& PointCloudMapping::GetGlobalPCMutex()
     {
         return mMutexGlobalPC;
+    }
+    std::mutex& PointCloudMapping::GetRosTMutex()
+    {
+        return mMutexRosT;
+    }
+    void PointCloudMapping::ResetInterrupt()
+    {
+        std::unique_lock<std::mutex> lock(mMutexRosT);
+        mInterrupt = false;
+    }
+    cv::Mat PointCloudMapping::WaitAndReturnT()
+    {
+        std::unique_lock<std::mutex> lock(mMutexRosT);
+        mCV.wait(lock,[this]{return mInterrupt;});
+        return mRosTwc;
     }
 
 }

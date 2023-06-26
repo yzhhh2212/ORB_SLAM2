@@ -13,6 +13,7 @@
 #include<vtkAutoInit.h>
 #include <pangolin/display/viewport.h>
 #include <pangolin/display/attach.h>
+#include <condition_variable>
 #ifdef Success 
 #undef Success
 #endif
@@ -67,6 +68,10 @@ public:
     void AddGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &pc);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr CloneGlobalPC(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &PC);
     std::mutex& GetGlobalPCMutex();
+    std::mutex& GetRosTMutex();
+    void ResetInterrupt();
+    cv::Mat WaitAndReturnT(); 
+    cv::Mat mRosTwc;
     bool mflag ;
 
     std::mutex mMutexPC;
@@ -96,6 +101,9 @@ protected:
     std::mutex mMutexPCStop;
     std::mutex mMutexPCInsertStop;
     std::mutex mMutexGlobalPC;
+    std::mutex mMutexRosT;
+    bool mInterrupt;
+    std::condition_variable mCV;
 
 
 };

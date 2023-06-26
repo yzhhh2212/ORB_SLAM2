@@ -234,7 +234,24 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     if((fabs(mDepthMapFactor-1.0f)>1e-5) || imDepth.type()!=CV_32F)
         imDepth.convertTo(imDepth,CV_32F,mDepthMapFactor);
     //获取帧的深度图
-    
+// int type = imDepth.type();
+// std::string type_str;
+// switch (type)
+// {
+//     case CV_8U:  type_str = "8U"; break;
+//     case CV_8S:  type_str = "8S"; break;
+//     case CV_16U: type_str = "16U"; break;
+//     case CV_16S: type_str = "16S"; break;
+//     case CV_32S: type_str = "32S"; break;
+//     case CV_32F: type_str = "32F"; break;
+//     case CV_64F: type_str = "64F"; break;
+//     default:     type_str = "unknown"; break;
+// }
+// std::cout << "Image type: " << type_str << std::endl;
+
+// // 打印图像的通道数
+// int channels = imD.channels();
+// std::cout << "Number of channels: " << channels << std::endl;  
     mCurrentFrame = Frame(mImGray,imDepth,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
     mCurrentFrame.mimRGBForPC = imRGB;
     //mCurrentFrame.SetDepthForPC(imDepth);
@@ -1154,7 +1171,7 @@ void Tracking::CreateNewKeyFrame()
 
     mpLocalMapper->SetNotStop(false);
 
-    // mpPointCloudMapping->InsertKeyFrame(pKF);
+    mpPointCloudMapping->InsertKeyFrame(pKF);
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;
