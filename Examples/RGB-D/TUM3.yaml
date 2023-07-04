@@ -68,3 +68,11 @@ Viewer.ViewpointY: -0.7
 Viewer.ViewpointZ: -1.8
 Viewer.ViewpointF: 500
 
+
+#--------------------------------------------------------------------------------------------
+# PointCloud Parameters
+#--------------------------------------------------------------------------------------------
+# UsePclViewer : true
+# LeafSize1 : 0.11
+# LeafSize2 : 0.11
+# LeafSize3 : 0.11 

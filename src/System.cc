@@ -96,11 +96,11 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
     //新建点云线程
-    mpPointCloudMapping = new PointCloudMapping(); 
+    mpPointCloudMapping = new PointCloudMapping(strSettingsFile); 
     mptPointCloudMapping = new thread(&ORB_SLAM2::PointCloudMapping::DisplayPointCloud,mpPointCloudMapping);
 
 
-    mpPointCloudMapping->USEPCLVIEWER = false;
+    // mpPointCloudMapping->USEPCLVIEWER = false;
 
     //Initialize the Viewer thread and launch
     if(bUseViewer)
@@ -333,7 +333,7 @@ void System::Shutdown()
     // Wait until all thread have effectively stopped
     while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || !mpPointCloudMapping->isFinished() || mpLoopCloser->isRunningGBA())
     {
-        cout << "有的线程害没结束呢,先不shutdown" << endl;
+        // cout << "有的线程害没结束呢,先不shutdown" << endl;
         usleep(5000);
     }
 

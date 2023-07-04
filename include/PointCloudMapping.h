@@ -38,7 +38,7 @@ class PointCloudMapping
     
 public:
     //构造函数
-    PointCloudMapping();
+    PointCloudMapping(const string &strSettingPath);
     //显示点云
     void DisplayPointCloud();
 
@@ -88,6 +88,9 @@ public:
     bool USEPCLVIEWER;
     bool USERVIZ;
     bool ROSMODE;
+    float mLeafSize1;
+    float mLeafSize2;
+    float mLeafSize3;
 protected:
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr mpGlobalCloud;
     bool mbFinishRequested;

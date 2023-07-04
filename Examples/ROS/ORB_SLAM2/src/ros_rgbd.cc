@@ -48,9 +48,8 @@ using namespace std;
 class ImageGrabber
 {
 public:
-    ImageGrabber(ORB_SLAM2::System* pSLAM):mpSLAM(pSLAM){amount = 0;}
+    ImageGrabber(ORB_SLAM2::System* pSLAM):mpSLAM(pSLAM){}
 
-    int amount;
 
     void GrabRGBD(const sensor_msgs::ImageConstPtr& msgRGB,const sensor_msgs::ImageConstPtr& msgD);
 
@@ -65,7 +64,6 @@ void PosePublishThread(ORB_SLAM2::System &SLAM)
         cv::Mat t ;
         cv::Mat rvec ;
         tf2::Quaternion q;
-        int amount = 0;
         
 
         ros::Publisher PosePublisher = nh.advertise<geometry_msgs::PoseStamped>("Pose", 1);
@@ -104,7 +102,6 @@ void PosePublishThread(ORB_SLAM2::System &SLAM)
             PosePublisher.publish(pose_stamped);
             PathPublisher.publish(path_msg);
 
-            cout << "正在发送关键帧POSE： " << amount++ << endl;
             SLAM.GetPointCloud()->ResetInterrupt();
 
             ros::spinOnce();

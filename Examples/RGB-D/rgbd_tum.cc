@@ -41,7 +41,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    int amount=0;
     // Retrieve paths to images
     vector<string> vstrImageFilenamesRGB;
     vector<string> vstrImageFilenamesD;
@@ -94,8 +93,6 @@ int main(int argc, char **argv)
 #else
         std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
 #endif
-        amount++;    
-        cout<<"frame amount: "<< amount<<endl;
         // Pass the image to the SLAM system
         SLAM.TrackRGBD(imRGB,imD,tframe);
 

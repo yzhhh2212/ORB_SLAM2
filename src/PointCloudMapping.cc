@@ -17,16 +17,43 @@
 #include <pcl/console/parse.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pangolin/pangolin.h>
-#include <condition_variable> 
+#include <condition_variable>
 
 namespace ORB_SLAM2
 {
     using namespace std;
-    PointCloudMapping::PointCloudMapping()
+    PointCloudMapping::PointCloudMapping(const string &strSettingPath)
     {
         // mpGlobalCloud = pcl::PointCloud<pcl::PointXYZRGBA>::makeShared();
         // pcl::make_shared<pcl::PointXYZRGBA>( );
 
+        cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+        cv::FileNode node = fSettings["UsePclViewer"];
+        if (node.empty())
+        {
+            cout << "Didn't find PclViewer parameters on Settingfile,Turn on PclViewer by default.  Usage: UsePclViewer : true/false " << endl;
+            USEPCLVIEWER = true;
+        }
+        else
+        {
+            USEPCLVIEWER = (int)node;
+        }
+        cv::FileNode node2 = fSettings["LeafSize1"];
+        cv::FileNode node3 = fSettings["LeafSize2"];
+        cv::FileNode node4 = fSettings["LeafSize3"];
+        if(node2.empty()||node3.empty()||node4.empty())
+        {
+            cout << "Didn't find LeafSize parameters on Settingfile,Set 0.02 by default.  Usage: LeafSize1 : float ; LeafSize2 : float ; LeafSize3 : float" << endl;
+            mLeafSize1 = 0.02f;
+            mLeafSize2 = 0.02f;
+            mLeafSize3 = 0.02f;
+        }
+        else
+        {
+            mLeafSize1 = (float)node2;
+            mLeafSize2 = (float)node3;
+            mLeafSize3 = (float)node4;
+        }
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud1(new pcl::PointCloud<pcl::PointXYZRGBA>);
         mpGlobalCloud = cloud1;
         mbFinishRequested = false;
@@ -35,7 +62,6 @@ namespace ORB_SLAM2
         mflagLC = 0;
         mflagThread = 0;
         mbUpdateCloudFinished = false;
-        USEPCLVIEWER = false;
         XInitThreads();
         UnsetInsertStop();
     }
@@ -91,8 +117,8 @@ namespace ORB_SLAM2
             {
                 for (; lastN < N; lastN++)
                 {
-                    cout<<"N:"<<N<<endl;
-                    cout<< "lastN" <<lastN<<endl;
+                    // cout << "N:" << N << endl;
+                    // cout << "lastN" << lastN << endl;
 
                     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
                     lock.lock();
@@ -100,7 +126,7 @@ namespace ORB_SLAM2
                     lock.unlock();
                     cv::Mat Twc = pKF->GetPoseInverse();
                     cloud = GenerateCloud(pKF);
-                    if(cloud == nullptr)
+                    if (cloud == nullptr)
                         continue;
                     std::unique_lock<std::mutex> lockGlobal(mMutexGlobalPC);
                     {
@@ -139,12 +165,12 @@ namespace ORB_SLAM2
 
             if (pKF->isBad())
             {
-                cout << "坏帧" << endl;
+                // cout << "坏帧" << endl;
                 continue;
             }
             else
             {
-                cout << "闭环更新帧 ：" << i << endl;
+                // cout << "闭环更新帧 ：" << i << endl;
                 cv::Mat Twc = pKF->GetPoseInverse();
                 Eigen::Isometry3d T1 = ORB_SLAM2::Converter::toSE3Quat(Twc);
                 pcl::PointCloud<pcl::PointXYZRGBA>::Ptr tmp2(new pcl::PointCloud<pcl::PointXYZRGBA>);
@@ -165,9 +191,8 @@ namespace ORB_SLAM2
 
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr PointCloudMapping::GenerateCloud(KeyFrame *pKF)
     {
-        if(pKF->isBad())
+        if (pKF->isBad())
         {
-            cout << "bad bad bad" << endl;
             return nullptr;
         }
         float z, x, y;
@@ -180,7 +205,7 @@ namespace ORB_SLAM2
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGBA>);
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
-        cout << "正在生成帧ID ：" << pKF->mnId << "的点云" << endl;
+        // cout << "正在生成帧ID ：" << pKF->mnId << "的点云" << endl;
         // if(pKF->mnId<10)
         // {
         //     cout << "empty" <<endl;
@@ -226,7 +251,7 @@ namespace ORB_SLAM2
         // cout << "滤波中" << endl;
         pcl::VoxelGrid<pcl::PointXYZRGBA> vg;
         vg.setInputCloud(cloud);
-        vg.setLeafSize(0.02f, 0.02f, 0.02f);
+        vg.setLeafSize(mLeafSize1,mLeafSize2,mLeafSize3);
         // vg.filter(*tmp);
         // cout << "滤波ed" << endl;
         vg.filter(*cloud);
@@ -300,7 +325,14 @@ namespace ORB_SLAM2
     void PointCloudMapping::SetFinish()
     {
         unique_lock<mutex> lockfinish(mMutexPCFinish);
-        mbFinished = true;
+        {
+            mbFinished = true;
+        }
+        std::unique_lock<std::mutex> lockT(mMutexRosT);
+        {
+            mInterrupt = true;
+            mCV.notify_one();
+        }
     }
 
     void PointCloudMapping::SetInsertStop()
@@ -390,16 +422,16 @@ namespace ORB_SLAM2
         std::unique_lock<mutex> lockGlobalPCinClone(mMutexGlobalPC);
         {
             // *PC = *mpGlobalCloud;
-            pcl::copyPointCloud(*mpGlobalCloud,*PC);
+            pcl::copyPointCloud(*mpGlobalCloud, *PC);
         }
         return PC;
     }
 
-    std::mutex& PointCloudMapping::GetGlobalPCMutex()
+    std::mutex &PointCloudMapping::GetGlobalPCMutex()
     {
         return mMutexGlobalPC;
     }
-    std::mutex& PointCloudMapping::GetRosTMutex()
+    std::mutex &PointCloudMapping::GetRosTMutex()
     {
         return mMutexRosT;
     }
@@ -411,7 +443,8 @@ namespace ORB_SLAM2
     cv::Mat PointCloudMapping::WaitAndReturnT()
     {
         std::unique_lock<std::mutex> lock(mMutexRosT);
-        mCV.wait(lock,[this]{return mInterrupt;});
+        mCV.wait(lock, [this]
+                 { return mInterrupt; });
         return mRosTwc;
     }
 
