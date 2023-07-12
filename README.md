@@ -25,7 +25,7 @@ cd /usr/local/project/ORB_SLAM2
 ./build_ros.sh
 ```
 ### 3.运行
-* 和原版ORB_SLAM2运行方式相同
+和原版ORB_SLAM2运行方式相同
 
 
 
