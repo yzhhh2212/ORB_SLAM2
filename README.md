@@ -1,3 +1,36 @@
+# 1. 说明
+1. 本源码为基于ORB-SLAM2的稠密建图算法
+2. 包含ROS和非ROS的运行模式
+3. 为此源码做了一个docker镜像,可以直接在此镜像内跑通
+4. 本人的第一个项目,请多多指教
+
+# 2. 依赖
+## OpenCV 4.2
+## Pangolin 0.5
+## ROS1
+## PCL
+## Eigen
+## DBoW2 and g2o (Included in Thirdparty folder)
+**
+# 3. 运行
+## 使用Docker:
+### 1. 创建容器
+```shell
+sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /home/handsfree/myproject:/usr/local/project -e QT_X11_NO_MITSHM=1  --privileged --net=host orb_slam2_dense_mapping
+```
+### 2. 进入源码文件夹编译源码
+```shell
+cd /usr/local/project/ORB_SLAM2
+./build.sh
+./build_ros.sh
+```
+### 3.运行
+* 和原版ORB_SLAM2运行方式相同
+
+
+
+
+
 # ORB-SLAM2
 **Authors:** [Raul Mur-Artal](http://webdiis.unizar.es/~raulmur/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/), [J. M. M. Montiel](http://webdiis.unizar.es/~josemari/) and [Dorian Galvez-Lopez](http://doriangalvez.com/) ([DBoW2](https://github.com/dorian3d/DBoW2))
 
