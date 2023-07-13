@@ -35,7 +35,7 @@ cd /usr/local/project/ORB_SLAM2
 #--------------------------------------------------------------------------------------------
 # PointCloud Parameters
 #--------------------------------------------------------------------------------------------
-UsePclViewer : true
+UsePclViewer : 1 # 1 for true , 0 for false
 LeafSize1 : 0.11
 LeafSize2 : 0.11
 LeafSize3 : 0.11
