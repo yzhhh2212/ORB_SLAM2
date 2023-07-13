@@ -5,13 +5,12 @@
 4. 本人的第一个项目,请多多指教
 
 # 2. 依赖
-## OpenCV 4.2
-## Pangolin 0.5
-## ROS1
-## PCL
-## Eigen
-## DBoW2 and g2o (Included in Thirdparty folder)
-**
+* OpenCV 4.2
+* Pangolin 0.5
+* ROS1
+* PCL
+* Eigen
+* DBoW2 and g2o (Included in Thirdparty folder)
 # 3. 运行
 ## 使用Docker:
 * linux下建议使用docker engine而不是docker desktop，因为docker desktop 会导致容器使用host的x11 gui不可用
