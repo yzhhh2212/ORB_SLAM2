@@ -1,8 +1,12 @@
 # 1. 说明
+
+![image](https://github.com/yzhhh2212/ORB_SLAM2_DENSE_MAPPING/assets/61613497/9fb09624-8bb6-43bb-b11b-750a8c95d55f)
+效果视频地址：https://www.bilibili.com/video/BV1Um4y1E7Gq/?vd_source=befb28323632d746bf0d416a715569cd
 1. 本源码为基于ORB-SLAM2的稠密建图算法,目前只支持RGBD模式
 2. 包含ROS和非ROS的运行模式
 3. 为此源码做了一个docker镜像,ROS和非ROS都可以直接在此镜像内跑通
 4. 本人的第一个项目,请多多指教
+
 
 # 2. 依赖
 * OpenCV 4.2
