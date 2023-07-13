@@ -29,6 +29,17 @@ cd /usr/local/project/ORB_SLAM2
 ./build.sh
 ./build_ros.sh
 ```
+### 3.SettingFile
+* 在设置文件TUM*.yaml末尾添加以下代码，以对滤波器以及PCL可视化的控制
+``` yaml
+#--------------------------------------------------------------------------------------------
+# PointCloud Parameters
+#--------------------------------------------------------------------------------------------
+UsePclViewer : true
+LeafSize1 : 0.11
+LeafSize2 : 0.11
+LeafSize3 : 0.11
+```
 ### 3.运行
 和原版ORB_SLAM2运行方式相同
 
