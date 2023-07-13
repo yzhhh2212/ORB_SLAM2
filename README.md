@@ -22,6 +22,7 @@ sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e Q
 ### 2. Clone本源码并且进入源码文件夹编译源码
 ```shell
 git clone https://github.com/yzhhh2212/ORB_SLAM2.git /usr/local/project/ORB_SLAM2/
+echo 'export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:/usr/local/project/ORB_SLAM2/Examples/ROS' >> ~/.zshrc
 cd /usr/local/project/ORB_SLAM2
 ./build.sh
 ./build_ros.sh
