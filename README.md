@@ -16,10 +16,11 @@
 ## 使用Docker:
 ### 1. 创建容器
 ```shell
-sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /home/handsfree/myproject:/usr/local/project -e QT_X11_NO_MITSHM=1  --privileged --net=host orb_slam2_dense_mapping
+sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e QT_X11_NO_MITSHM=1 -e ROS_MASTER_URI=http://localhost:11311/ -e ROS_IP=127.0.0.1 --privileged --net=host yzhhh2212/orb_slam2_dense_mapping:4.0
 ```
-### 2. 进入源码文件夹编译源码
+### 2. Clone本源码并且进入源码文件夹编译源码
 ```shell
+git clone https://github.com/yzhhh2212/ORB_SLAM2.git /usr/local/project/
 cd /usr/local/project/ORB_SLAM2
 ./build.sh
 ./build_ros.sh
