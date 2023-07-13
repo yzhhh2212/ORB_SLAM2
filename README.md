@@ -1,5 +1,5 @@
 # 1. 说明
-1. 本源码为基于ORB-SLAM2的稠密建图算法
+1. 本源码为基于ORB-SLAM2的稠密建图算法,目前只支持RGBD模式
 2. 包含ROS和非ROS的运行模式
 3. 为此源码做了一个docker镜像,ROS和非ROS都可以直接在此镜像内跑通
 4. 本人的第一个项目,请多多指教
@@ -14,7 +14,7 @@
 **
 # 3. 运行
 ## 使用Docker:
-* linux下建议使用docker engine而不是docker desktop，因为docker desktop 会导致x11 gui不可用
+* linux下建议使用docker engine而不是docker desktop，因为docker desktop 会导致容器使用host的x11 gui不可用
 ### 1. 创建容器
 ```shell
 sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e QT_X11_NO_MITSHM=1 -e ROS_MASTER_URI=http://localhost:11311/ -e ROS_IP=127.0.0.1 --privileged --net=host yzhhh2212/orb_slam2_dense_mapping:4.0
@@ -40,13 +40,13 @@ LeafSize1 : 0.11
 LeafSize2 : 0.11
 LeafSize3 : 0.11
 ```
-### 3.运行
+### 4.运行
 和原版ORB_SLAM2运行方式相同
 
 
 
 
-
+-------
 # ORB-SLAM2
 **Authors:** [Raul Mur-Artal](http://webdiis.unizar.es/~raulmur/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/), [J. M. M. Montiel](http://webdiis.unizar.es/~josemari/) and [Dorian Galvez-Lopez](http://doriangalvez.com/) ([DBoW2](https://github.com/dorian3d/DBoW2))
 
