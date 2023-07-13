@@ -21,7 +21,7 @@ sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e Q
 [docker镜像地址](https://hub.docker.com/repository/docker/yzhhh2212/orb_slam2_dense_mapping/general),欢迎star
 ### 2. Clone本源码并且进入源码文件夹编译源码
 ```shell
-git clone https://github.com/yzhhh2212/ORB_SLAM2.git /usr/local/project
+git clone https://github.com/yzhhh2212/ORB_SLAM2.git /usr/local/project/ORB_SLAM2/
 cd /usr/local/project/ORB_SLAM2
 ./build.sh
 ./build_ros.sh
