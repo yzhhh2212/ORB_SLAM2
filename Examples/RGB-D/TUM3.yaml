@@ -72,7 +72,7 @@ Viewer.ViewpointF: 500
 #--------------------------------------------------------------------------------------------
 # PointCloud Parameters
 #--------------------------------------------------------------------------------------------
-# UsePclViewer : true
-# LeafSize1 : 0.11
-# LeafSize2 : 0.11
-# LeafSize3 : 0.11 
+UsePclViewer : true
+LeafSize1 : 0.11
+LeafSize2 : 0.11
+LeafSize3 : 0.11 
