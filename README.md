@@ -13,7 +13,7 @@
 ## DBoW2 and g2o (Included in Thirdparty folder)
 **
 # 3. 运行
-## 使用Docker:
+## 使用Docker(linux下建议使用docker engine而不是docker desktop):
 ### 1. 创建容器
 ```shell
 sudo docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e QT_X11_NO_MITSHM=1 -e ROS_MASTER_URI=http://localhost:11311/ -e ROS_IP=127.0.0.1 --privileged --net=host yzhhh2212/orb_slam2_dense_mapping:4.0
