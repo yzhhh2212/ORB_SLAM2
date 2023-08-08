@@ -175,4 +175,34 @@ void Map::PreSave()
     
 }
 
+void Map::PostLoad()
+{
+    std::copy(mvpBackupMapPoints.begin(), mvpBackupMapPoints.end(), std::inserter(mspMapPoints, mspMapPoints.begin()));
+    std::copy(mvpBackupKeyFrames.begin(), mvpBackupKeyFrames.end(), std::inserter(mspKeyFrames, mspKeyFrames.begin()));
+
+    map<long unsigned int, MapPoint *> mpMapPointId;
+    for (MapPoint *pMPi : mspMapPoints)
+    {
+        if (!pMPi || pMPi->isBad())
+            continue;
+        mpMapPointId[pMPi->mnId] = pMPi;
+    }
+
+    map<long unsigned int, KeyFrame *> mpKeyFrameId;
+    for (KeyFrame *pKFi : mspKeyFrames)
+    {
+        if (!pKFi || pKFi->isBad())
+            continue;
+        mpKeyFrameId[pKFi->mnId] = pKFi;
+    }
+
+    for (MapPoint *pMPi : mspMapPoints)
+    {
+        if (!pMPi || pMPi->isBad())
+            continue;
+        pMPi->PostLoad(mpKeyFrameId,mpMapPointId);
+    }
+
+}
+
 } //namespace ORB_SLAM

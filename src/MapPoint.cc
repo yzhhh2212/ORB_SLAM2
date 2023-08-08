@@ -430,8 +430,19 @@ void MapPoint::PreSave()
     mBackupRefKFId = -1;
     if(mpRefKF) 
         mBackupRefKFId = mpRefKF->mnId;
-
-
 }
 
+void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
+{
+    
+    mpRefKF = mpKFid[mBackupRefKFId];
+
+    mObservations.clear();
+    for(auto it = mbackupobservations.begin(),end = mbackupobservations.end(); it != end; ++it)
+    {
+        KeyFrame* pKFi = mpKFid[it->first];
+        if(pKFi)
+            mObservations[pKFi] = it->second;
+    }
+}
 } //namespace ORB_SLAM

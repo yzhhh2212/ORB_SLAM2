@@ -20,6 +20,9 @@ Thirdparty/g2o/lib/
 Vocabulary/ORBvoc.txt
 data/**
 build/
+afterLC.pcd
+CameraTrajectory.txt
+mapSave
 *~
 #lib/
 

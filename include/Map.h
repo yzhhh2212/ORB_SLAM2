@@ -48,6 +48,7 @@ class Map
 public:
     Map();
 
+    void PostLoad();
     void PreSave();
     void SaveMap();
     void AddKeyFrame(KeyFrame* pKF);
