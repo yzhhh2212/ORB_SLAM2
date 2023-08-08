@@ -27,6 +27,11 @@
 #include "PointCloudMapping.h"
 #include <iomanip>
 
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
 namespace ORB_SLAM2
 {
 
@@ -525,6 +530,25 @@ PointCloudMapping* System::GetPointCloud()
     return mpPointCloudMapping;
 }
 
+Map* System::GetMap()
+{
+    return mpMap;
+}
+
+void System::SaveMap()
+{
+    
+    mpMap->PreSave();
+    cout << "预保存结束" << endl;
+
+    std::ofstream ofs("mapSave");
+    boost::archive::text_oarchive oa(ofs);
+    cout << "正在保存地图。。。。。。。。。。。" << endl;
+    oa << mpMap;
+    cout << "保存地图成功" << endl;
+
+    
+}
 } //namespace ORB_SLAM
 
 

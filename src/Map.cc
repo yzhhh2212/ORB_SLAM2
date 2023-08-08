@@ -19,6 +19,11 @@
 */
 
 #include "Map.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
 
 #include<mutex>
 
@@ -27,6 +32,19 @@ namespace ORB_SLAM2
 
 Map::Map():mnMaxKFid(0),mnBigChangeIdx(0)
 {
+}
+
+void Map::SaveMap()
+{
+    std::ofstream ofs("mapSave");
+    boost::archive::text_oarchive oa(ofs);
+    cout << "正在保存地图。。。。。。。。。。。" << endl;
+    // 显式遍历 std::set 并序列化每个元素
+    for (auto it = mspMapPoints.begin(); it != mspMapPoints.end(); ++it)
+    {
+        MapPoint *p = *it;
+        oa << *p; // 序列化 MapPoint 对象
+    }
 }
 
 void Map::AddKeyFrame(KeyFrame *pKF)
@@ -128,6 +146,33 @@ void Map::clear()
     mnMaxKFid = 0;
     mvpReferenceMapPoints.clear();
     mvpKeyFrameOrigins.clear();
+}
+
+void Map::PreSave()
+{
+    mvpBackupMapPoints.clear();
+    for(MapPoint *pMPi : mspMapPoints)
+    {
+        if(pMPi->isBad() || !pMPi)
+        {
+            continue;
+        }
+        mvpBackupMapPoints.push_back(pMPi);
+        pMPi->PreSave();
+    }
+
+    mvpBackupKeyFrames.clear();
+    for(KeyFrame *pKFi : mspKeyFrames)
+    {
+        if(pKFi->isBad() || !pKFi)
+        {
+            continue;
+        }
+        mvpBackupKeyFrames.push_back(pKFi);
+        pKFi->PreSave();
+    }
+
+    
 }
 
 } //namespace ORB_SLAM

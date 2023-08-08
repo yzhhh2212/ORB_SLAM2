@@ -680,4 +680,38 @@ float KeyFrame::ComputeSceneMedianDepth(const int q)
     return vDepths[(vDepths.size()-1)/q];
 }
 
+void KeyFrame::PreSave()
+{
+    //保存帧内所有地图点
+    mvBackupMapPointsId.clear();
+    mvBackupMapPointsId.reserve(N);
+    for(int i = 0 ; i < N ; ++i)
+    {
+        if(mvpMapPoints[i])
+            mvBackupMapPointsId.push_back(mvpMapPoints[i]->mnId);
+        else
+            mvBackupMapPointsId.push_back(-1);
+    }
+
+    //保存连接的关键帧ID和权重
+    mBackupConnectedKeyFrameIdWeights.clear();
+    for(auto it = mConnectedKeyFrameWeights.begin(),end = mConnectedKeyFrameWeights.end();it != end ; ++it)
+    {
+        mBackupConnectedKeyFrameIdWeights[it->first->mnId] = it->second;
+    }
+
+    //保存父关键帧ID
+    mBackupParentId = -1;
+    if (mpParent)
+        mBackupParentId = mpParent->mnId;
+
+    //保存子关键帧ID
+    mvBackupChildrensId.clear();
+    mvBackupChildrensId.reserve(mspChildrens.size());
+    for(KeyFrame* pKFi : mspChildrens)
+    {
+        mvBackupChildrensId.push_back(pKFi->mnId);
+    }
+
+}
 } //namespace ORB_SLAM

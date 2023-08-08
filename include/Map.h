@@ -26,6 +26,7 @@
 #include <set>
 
 #include <mutex>
+#include <boost/serialization/base_object.hpp>
 
 
 
@@ -37,9 +38,18 @@ class KeyFrame;
 
 class Map
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ar & mvpBackupKeyFrames;
+        ar & mvpBackupMapPoints;
+    }
 public:
     Map();
 
+    void PreSave();
+    void SaveMap();
     void AddKeyFrame(KeyFrame* pKF);
     void AddMapPoint(MapPoint* pMP);
     void EraseMapPoint(MapPoint* pMP);
@@ -69,6 +79,10 @@ public:
 protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
+
+    //序列化保存变量
+    std::vector<MapPoint*> mvpBackupMapPoints;
+    std::vector<KeyFrame*> mvpBackupKeyFrames;
 
     std::vector<MapPoint*> mvpReferenceMapPoints;
 

@@ -29,6 +29,10 @@
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
 #include "PointCloudMapping.h"
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include "SerializationUtils.h"
 
 #include <mutex>
 
@@ -43,8 +47,51 @@ class KeyFrameDatabase;
 
 class KeyFrame
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ar & mnId;
+        ar & const_cast<const long unsigned int&> (mnFrameId);
+        ar & const_cast<double&> (mTimeStamp);
+        serializeMatrix(ar,Tcw,version);
+        ar & const_cast<int&> ( N );
+        serializeVectorKeyPoints(ar,mvKeys,version);
+        serializeVectorKeyPoints(ar,mvKeysUn,version);
+        serializeMatrix(ar,mDescriptors,version);
+
+        // Calibration parameters
+        ar & const_cast<float&>(fx);
+        ar & const_cast<float&>(fy);
+        ar & const_cast<float&>(invfx);
+        ar & const_cast<float&>(invfy);
+        ar & const_cast<float&>(cx);
+        ar & const_cast<float&>(cy);
+        ar & const_cast<float&>(mbf);
+        ar & const_cast<float&>(mb);
+        ar & const_cast<float&>(mThDepth);
+        
+        ar & const_cast<vector<float>& >(mvuRight);
+        const std::vector<float> mvDepth; 
+        // ar & mBowVec;
+        // ar & mFeatVec;
+        serializeMatrix(ar,mTcp,version);
+
+        ar & mBackupConnectedKeyFrameIdWeights;
+        ar & mBackupParentId;
+        ar & mvBackupChildrensId;
+        ar & mvBackupMapPointsId;
+
+        ar & mbNotErase;
+        ar & mbToBeErased;
+        ar & mbBad;
+    }
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+
+    //地图保存的方法
+    void PreSave();
+    int num;
 
     //点云方法
     void SetPointCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &Cloud);
@@ -200,6 +247,13 @@ public:
 
     // The following variables need to be accessed trough a mutex to be thread safe.
 protected:
+
+    //序列化保存相关
+    std::vector<long long int> mvBackupMapPointsId;
+    std::map<long unsigned int, int> mBackupConnectedKeyFrameIdWeights;
+    long long int mBackupParentId;
+    std::vector<long unsigned int> mvBackupChildrensId;
+
 
     // SE3 Pose and camera center
     cv::Mat Tcw;

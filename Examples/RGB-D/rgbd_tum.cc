@@ -135,9 +135,10 @@ int main(int argc, char **argv)
     // Save camera trajectory
     SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt"); 
-    cout << "正在保存点云" << endl << endl;
-    SLAM.SavePointCloud();
-    cout << "保存点云成功" << endl << endl;
+    SLAM.SaveMap();
+    // cout << "正在保存点云" << endl << endl;
+    // SLAM.SavePointCloud();
+    // cout << "保存点云成功" << endl << endl;
     return 0;
 }
 

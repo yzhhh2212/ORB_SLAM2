@@ -417,5 +417,21 @@ int MapPoint::PredictScale(const float &currentDist, Frame* pF)
 }
 
 
+void MapPoint::PreSave()
+{
+    //保存观测关系
+    for(auto it = mObservations.begin(),end = mObservations.end();it != end; ++it)
+    {
+        KeyFrame* pKFi = it->first;
+        mbackupobservations[pKFi->mnId] = it->second;
+    }
+
+    //保存参考关键帧ID
+    mBackupRefKFId = -1;
+    if(mpRefKF) 
+        mBackupRefKFId = mpRefKF->mnId;
+
+
+}
 
 } //namespace ORB_SLAM

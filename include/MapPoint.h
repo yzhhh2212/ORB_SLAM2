@@ -25,6 +25,8 @@
 #include"Frame.h"
 #include"Map.h"
 
+#include"SerializationUtils.h"
+
 #include<opencv2/core/core.hpp>
 #include<mutex>
 
@@ -38,7 +40,19 @@ class Frame;
 
 class MapPoint
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ar & mnId;
+        serializeMatrix(ar,mWorldPos,version);
+        ar & mBackupRefKFId;
+        ar & mbackupobservations;
+    }
 public:
+
+    void PreSave();
+
     MapPoint(const cv::Mat &Pos, KeyFrame* pRefKF, Map* pMap);
     MapPoint(const cv::Mat &Pos,  Map* pMap, Frame* pFrame, const int &idxF);
 
@@ -87,6 +101,7 @@ public:
     long int mnFirstKFid;
     long int mnFirstFrame;
     int nObs;
+    int num;
 
     // Variables used by the tracking
     float mTrackProjX;
@@ -113,6 +128,10 @@ public:
     static std::mutex mGlobalMutex;
 
 protected:    
+
+     //序列化保存相关
+     std::map<long unsigned int, int> mbackupobservations; 
+     long unsigned int mBackupRefKFId;
 
      // Position in absolute coordinates
      cv::Mat mWorldPos;
