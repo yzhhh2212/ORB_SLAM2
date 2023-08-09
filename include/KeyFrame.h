@@ -52,7 +52,7 @@ class KeyFrame
     void serialize(Archive & ar, const unsigned int version)
     {
         ar & mnId;
-        ar & const_cast<const long unsigned int&> (mnFrameId);
+        ar & const_cast<long unsigned int&> (mnFrameId);
         ar & const_cast<double&> (mTimeStamp);
         serializeMatrix(ar,Tcw,version);
         ar & const_cast<int&> ( N );
@@ -72,7 +72,7 @@ class KeyFrame
         ar & const_cast<float&>(mThDepth);
         
         ar & const_cast<vector<float>& >(mvuRight);
-        const std::vector<float> mvDepth; 
+        ar & const_cast<vector<float>& >(mvDepth);
         // ar & mBowVec;
         // ar & mFeatVec;
         serializeMatrix(ar,mTcp,version);
@@ -86,12 +86,15 @@ class KeyFrame
         ar & mbToBeErased;
         ar & mbBad;
         
-        ar & KeyFrame::nNextId;
+        // ar & mFramenNextId;
     }
 public:
+    KeyFrame();
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     //地图保存的方法
+    //序列化相关的Frame的全局变量NextId
+    long unsigned int mFramenNextId;
     void PreSave();
     int num;
     void PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid);
@@ -175,6 +178,7 @@ public:
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:
+
 
     static long unsigned int nNextId;
     long unsigned int mnId;

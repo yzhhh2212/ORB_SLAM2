@@ -47,6 +47,7 @@ class Map
     {
         ar & mvpBackupKeyFrames;
         ar & mvpBackupMapPoints;
+        ar & mFramenNextId;
         // ar & Frame::nNextId;
         // ar & KeyFrame::nNextId;
         // ar & MapPoint::nNextId;
@@ -54,6 +55,8 @@ class Map
 public:
     Map();
 
+    //序列化相关的Frame的全局变量NextId
+    long unsigned int mFramenNextId;
     void PostLoad();
     void PreSave();
     void SaveMap();

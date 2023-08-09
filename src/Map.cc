@@ -171,6 +171,8 @@ void Map::PreSave()
         mvpBackupKeyFrames.push_back(pKFi);
         pKFi->PreSave();
     }
+    //保存Frame的静态变量nNextid
+    mFramenNextId = Frame::nNextId;
 
     
 }
@@ -213,6 +215,8 @@ void Map::PostLoad()
             continue;
         pKFi->PostLoad(mpKeyFrameId,mpMapPointId);
     }
+
+    Frame::nNextId = mFramenNextId;
 }
 
 } //namespace ORB_SLAM

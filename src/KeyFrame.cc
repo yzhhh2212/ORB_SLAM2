@@ -28,6 +28,18 @@ namespace ORB_SLAM2
 
 long unsigned int KeyFrame::nNextId=0;
 
+KeyFrame::KeyFrame()
+    : mnFrameId(0), mTimeStamp(0), mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
+    mfGridElementWidthInv(0), mfGridElementHeightInv(0),
+    mnTrackReferenceForFrame(0), mnFuseTargetForKF(0), mnBALocalForKF(0), mnBAFixedForKF(0), 
+    mnLoopQuery(0), mnLoopWords(0), mnRelocQuery(0), mnRelocWords(0),  mnBAGlobalForKF(0),
+    fx(0), fy(0), cx(0), cy(0), invfx(0), invfy(0), mbf(0), mb(0), mThDepth(0), N(0), mvKeys(static_cast<vector<cv::KeyPoint>>(NULL)), mvKeysUn(static_cast<vector<cv::KeyPoint>>(NULL)),
+    mvuRight(static_cast<vector<float>>(NULL)), mvDepth(static_cast<vector<float>>(NULL)), mnScaleLevels(0), mfScaleFactor(0),
+    mfLogScaleFactor(0), mvScaleFactors(0), mvLevelSigma2(0), mvInvLevelSigma2(0), mnMinX(0), mnMinY(0), mnMaxX(0),
+    mnMaxY(0),  mbFirstConnection(true), mpParent(NULL), mbNotErase(false),
+    mbToBeErased(false), mbBad(false), mHalfBaseline(0)
+{
+}
 KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
     mnFrameId(F.mnId),  mTimeStamp(F.mTimeStamp), mnGridCols(FRAME_GRID_COLS), mnGridRows(FRAME_GRID_ROWS),
     mfGridElementWidthInv(F.mfGridElementWidthInv), mfGridElementHeightInv(F.mfGridElementHeightInv),
@@ -713,6 +725,8 @@ void KeyFrame::PreSave()
         mvBackupChildrensId.push_back(pKFi->mnId);
     }
 
+    // //保存Frame的静态变量nNextid
+    // mFramenNextId = Frame::nNextId;
 }
 void KeyFrame::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
 {
