@@ -48,6 +48,7 @@ class MapPoint
         serializeMatrix(ar,mWorldPos,version);
         ar & mBackupRefKFId;
         ar & mbackupobservations;
+        ar & MapPoint::nNextId;
     }
 public:
 

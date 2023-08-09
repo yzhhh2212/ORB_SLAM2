@@ -30,6 +30,7 @@
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
 #include "Map.h"
+#include "Frame.h"
 #include "LocalMapping.h"
 #include "LoopClosing.h"
 #include "KeyFrameDatabase.h"
@@ -67,6 +68,8 @@ public:
     System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
 
     void SaveMap();
+
+    void LoadMap();
 
     Map* GetMap();
     // Proccess the given stereo frame. Images must be synchronized and rectified.

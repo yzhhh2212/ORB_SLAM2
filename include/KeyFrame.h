@@ -85,6 +85,8 @@ class KeyFrame
         ar & mbNotErase;
         ar & mbToBeErased;
         ar & mbBad;
+        
+        ar & KeyFrame::nNextId;
     }
 public:
     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
@@ -92,6 +94,7 @@ public:
     //地图保存的方法
     void PreSave();
     int num;
+    void PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid);
 
     //点云方法
     void SetPointCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &Cloud);

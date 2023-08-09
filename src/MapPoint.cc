@@ -435,7 +435,8 @@ void MapPoint::PreSave()
 void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
 {
     
-    mpRefKF = mpKFid[mBackupRefKFId];
+    if(mpKFid[mBackupRefKFId])
+        mpRefKF = mpKFid[mBackupRefKFId];
 
     mObservations.clear();
     for(auto it = mbackupobservations.begin(),end = mbackupobservations.end(); it != end; ++it)
@@ -444,5 +445,7 @@ void MapPoint::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsi
         if(pKFi)
             mObservations[pKFi] = it->second;
     }
+    //清理备份容器
+    mbackupobservations.clear();
 }
 } //namespace ORB_SLAM

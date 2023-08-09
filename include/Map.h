@@ -22,11 +22,14 @@
 #define MAP_H
 
 #include "MapPoint.h"
+#include "Frame.h"
 #include "KeyFrame.h"
 #include <set>
 
 #include <mutex>
 #include <boost/serialization/base_object.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/export.hpp>
 
 
 
@@ -44,6 +47,9 @@ class Map
     {
         ar & mvpBackupKeyFrames;
         ar & mvpBackupMapPoints;
+        // ar & Frame::nNextId;
+        // ar & KeyFrame::nNextId;
+        // ar & MapPoint::nNextId;
     }
 public:
     Map();

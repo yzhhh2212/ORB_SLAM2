@@ -714,4 +714,46 @@ void KeyFrame::PreSave()
     }
 
 }
+void KeyFrame::PostLoad(map<long unsigned int, KeyFrame*>& mpKFid, map<long unsigned int, MapPoint*>& mpMPid)
+{
+    //设置位姿
+    SetPose(Tcw);
+
+    //恢复观测地图点
+    mvpMapPoints.clear();
+    mvpMapPoints.reserve(N);
+    for(int i = 0; i < N; ++i)
+    {
+       if(mvBackupMapPointsId[i] != -1)
+            mvpMapPoints[i] = mpMPid[mvBackupMapPointsId[i]];
+       else
+            mvpMapPoints[i] = static_cast<MapPoint *>(NULL);
+    }
+
+    //恢复共视帧以及权重
+    mConnectedKeyFrameWeights.clear();
+    for(auto it = mBackupConnectedKeyFrameIdWeights.begin(), end = mBackupConnectedKeyFrameIdWeights.end(); it != end; ++it)
+    {
+        mConnectedKeyFrameWeights[mpKFid[it->first]] = it->second;
+    }
+
+    //恢复父关键帧
+    if(mBackupParentId >= 0)
+        mpParent = mpKFid[mBackupParentId];
+    else
+        mpParent = static_cast<KeyFrame *>(NULL);
+
+    //恢复子关键帧
+    mspChildrens.clear();
+    for(long unsigned int pKFIdi : mvBackupChildrensId)
+    {
+        mspChildrens.insert(mpKFid[pKFIdi]);
+    }
+
+    //清理备份容器
+    mBackupConnectedKeyFrameIdWeights.clear();
+    mvBackupChildrensId.clear();
+    mvBackupMapPointsId.clear();
+
+}
 } //namespace ORB_SLAM

@@ -180,6 +180,7 @@ void Map::PostLoad()
     std::copy(mvpBackupMapPoints.begin(), mvpBackupMapPoints.end(), std::inserter(mspMapPoints, mspMapPoints.begin()));
     std::copy(mvpBackupKeyFrames.begin(), mvpBackupKeyFrames.end(), std::inserter(mspKeyFrames, mspKeyFrames.begin()));
 
+    //将地图点ID和地图点地址对应起来
     map<long unsigned int, MapPoint *> mpMapPointId;
     for (MapPoint *pMPi : mspMapPoints)
     {
@@ -188,6 +189,7 @@ void Map::PostLoad()
         mpMapPointId[pMPi->mnId] = pMPi;
     }
 
+    //将关键帧ID和关键帧地址对应起来
     map<long unsigned int, KeyFrame *> mpKeyFrameId;
     for (KeyFrame *pKFi : mspKeyFrames)
     {
@@ -196,6 +198,7 @@ void Map::PostLoad()
         mpKeyFrameId[pKFi->mnId] = pKFi;
     }
 
+    //后加载地图点
     for (MapPoint *pMPi : mspMapPoints)
     {
         if (!pMPi || pMPi->isBad())
@@ -203,6 +206,13 @@ void Map::PostLoad()
         pMPi->PostLoad(mpKeyFrameId,mpMapPointId);
     }
 
+    //后加载关键帧
+    for (KeyFrame *pKFi : mspKeyFrames)
+    {
+        if (!pKFi || pKFi->isBad())
+            continue;
+        pKFi->PostLoad(mpKeyFrameId,mpMapPointId);
+    }
 }
 
 } //namespace ORB_SLAM

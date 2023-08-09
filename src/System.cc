@@ -27,11 +27,14 @@
 #include "PointCloudMapping.h"
 #include <iomanip>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/base_object.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 namespace ORB_SLAM2
 {
 
@@ -87,6 +90,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpFrameDrawer = new FrameDrawer(mpMap);
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
+    LoadMap();
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
@@ -547,8 +551,26 @@ void System::SaveMap()
     oa << mpMap;
     cout << "保存地图成功" << endl;
 
-    
 }
+
+void System::LoadMap()
+{
+    std::ifstream ifs("mapSave");
+    if (!ifs.is_open())
+    {
+        cout << "打开文件失败" << endl;
+        return;
+    }
+    
+    cout << "正在加载地图。。。。。。。。。。。" << endl;
+    boost::archive::text_iarchive ia(ifs);
+    ia >> mpMap;
+    cout << "加载地图成功" << endl;
+    
+    mpMap->PostLoad();
+    cout << "后续加载工作完成" << endl;
+}
+
 } //namespace ORB_SLAM
 
 
