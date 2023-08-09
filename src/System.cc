@@ -86,7 +86,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     //Create the Map
     mpMap = new Map();
     cout << "FramenNextiD" <<Frame::nNextId <<endl;
-    // LoadMap();
+    LoadMap();
     cout << "afterFramenNextiD"<<Frame::nNextId << endl;
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(mpMap);

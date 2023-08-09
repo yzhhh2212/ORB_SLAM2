@@ -73,8 +73,8 @@ class KeyFrame
         
         ar & const_cast<vector<float>& >(mvuRight);
         ar & const_cast<vector<float>& >(mvDepth);
-        // ar & mBowVec;
-        // ar & mFeatVec;
+        ar & mBowVec;
+        ar & mFeatVec;
         serializeMatrix(ar,mTcp,version);
 
         ar & mBackupConnectedKeyFrameIdWeights;
