@@ -85,12 +85,13 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Create the Map
     mpMap = new Map();
-
+    cout << "FramenNextiD" <<Frame::nNextId <<endl;
+    // LoadMap();
+    cout << "afterFramenNextiD"<<Frame::nNextId << endl;
     //Create Drawers. These are used by the Viewer
     mpFrameDrawer = new FrameDrawer(mpMap);
     mpMapDrawer = new MapDrawer(mpMap, strSettingsFile);
 
-    // LoadMap();
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
@@ -545,8 +546,8 @@ void System::SaveMap()
     mpMap->PreSave();
     cout << "预保存结束" << endl;
 
-    std::ofstream ofs("mapSave");
-    boost::archive::text_oarchive oa(ofs);
+    std::ofstream ofs("mapSavebi");
+    boost::archive::binary_oarchive oa(ofs);
     cout << "正在保存地图。。。。。。。。。。。" << endl;
     oa << mpMap;
     cout << "保存地图成功" << endl;
@@ -555,7 +556,7 @@ void System::SaveMap()
 
 void System::LoadMap()
 {
-    std::ifstream ifs("mapSave");
+    std::ifstream ifs("mapSavebi");
     if (!ifs.is_open())
     {
         cout << "打开文件失败" << endl;
@@ -563,7 +564,7 @@ void System::LoadMap()
     }
     
     cout << "正在加载地图。。。。。。。。。。。" << endl;
-    boost::archive::text_iarchive ia(ifs);
+    boost::archive::binary_iarchive ia(ifs);
     ia >> mpMap;
     cout << "加载地图成功" << endl;
     
